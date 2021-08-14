@@ -9,9 +9,10 @@ public class FileDirNode {
     FileDirNode parentDir;
     String prefix;
 
-    public FileDirNode(File file, StringBuilder prefix, File parentDir) {
+    public FileDirNode(File file, StringBuilder prefix, FileDirNode parentDir) {
         this.name = file.getName();
         this.length = file.length();
+        this.parentDir = parentDir;
     }
 
     public String getName() {

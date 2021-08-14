@@ -24,7 +24,8 @@ public class FileTreeImpl implements FileTree {
                 try {
                     StringBuilder sb = new StringBuilder();
                     prefix = new StringBuilder();
-                    return Optional.of(showDir(file, sb, prefix, false).toString());
+                    return Optional.of(showDir(file, sb, prefix, false, new FileDirNode(file, new StringBuilder(""),
+                            null)).toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                     return Optional.empty();
@@ -33,14 +34,14 @@ public class FileTreeImpl implements FileTree {
         }
     }
 
-    StringBuilder showDir(File file, StringBuilder sb, StringBuilder prefix, boolean lastElement) throws IOException {
-        File parentDir = file;
+    StringBuilder showDir(File file, StringBuilder sb, StringBuilder prefix, boolean lastElement, FileDirNode parentDir) throws IOException {
         Long folderSize;
         ArrayList<File> filesOnly = new ArrayList<>();
         ArrayList<File> directories = new ArrayList<>();
         sb.append(prefix);
         FileDirNode curFile = new FileDirNode(file, prefix, parentDir);
-        filesDirsTree.add(new FileDirNode(file, prefix, parentDir));
+        //????
+        filesDirsTree.add(curFile);
         if (file.isFile()) {
 
             // sb.append(file.length());
@@ -52,8 +53,8 @@ public class FileTreeImpl implements FileTree {
 
         if (file.isDirectory()) {
             StringBuilder thisPrefix = new StringBuilder(prefix);
-            File[] files = file.listFiles();
-            for ( File fileOrDir : files ) {
+            File[] childFiles = file.listFiles();
+            for ( File fileOrDir : childFiles ) {
                 if (fileOrDir.isDirectory()) {
                     directories.add(fileOrDir);
                 } else {
@@ -64,6 +65,13 @@ public class FileTreeImpl implements FileTree {
             }
 
             Collections.sort(directories);
+            if (directories.size()==0){
+                long sizeOfParentDir = 0;
+                for (File leafFile : filesOnly){
+                    sizeOfParentDir = sizeOfParentDir+leafFile.length();
+                }
+                //calculate the size of the directory
+            }
             Collections.sort(filesOnly);
             directories.addAll(filesOnly);
             if (lastElement) {
@@ -78,7 +86,7 @@ public class FileTreeImpl implements FileTree {
                     replaceAll(thisPrefix, Pattern.compile("├─"), "└─");
                     lastElement = true;
                 }
-                showDir(directories.get(row), sb, thisPrefix, lastElement);
+                showDir(directories.get(row), sb, thisPrefix, lastElement, parentDir);
             }
         }
         return sb;
