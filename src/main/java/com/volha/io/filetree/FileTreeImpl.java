@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FileTreeImpl implements FileTree {
+    List<FileDirNode> filesDirsTree;
 
     @Override
     public Optional<String> tree(Path path) {
@@ -33,15 +34,19 @@ public class FileTreeImpl implements FileTree {
     }
 
     StringBuilder showDir(File file, StringBuilder sb, StringBuilder prefix, boolean lastElement) throws IOException {
+        File parentDir = file;
         Long folderSize;
         ArrayList<File> filesOnly = new ArrayList<>();
         ArrayList<File> directories = new ArrayList<>();
         sb.append(prefix);
-        sb.append(file.getName() + " ");
+        FileDirNode curFile = new FileDirNode(file, prefix, parentDir);
+        filesDirsTree.add(new FileDirNode(file, prefix, parentDir));
         if (file.isFile()) {
-            sb.append(file.length());
+
+            // sb.append(file.length());
         } else {
-            sb.append(getFolderSize(file));
+            curFile.setLength(file.length());
+            // sb.append(getFolderSize(file));
         }
         sb.append(" bytes\n");
 
@@ -67,6 +72,7 @@ public class FileTreeImpl implements FileTree {
             }
             replaceAll(thisPrefix, Pattern.compile("├─"), "│ ");
             thisPrefix.append("├─ ");
+
             for ( int row = 0; row < directories.size(); row++ ) {
                 if (row == directories.size() - 1) {
                     replaceAll(thisPrefix, Pattern.compile("├─"), "└─");
